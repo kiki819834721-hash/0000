@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="使用虚构参数的离线促销试算台，比较每单贡献、日结余和保本单量。">
+  <title>活动试算台 · MOSS 实验室</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="model.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳转到试算表单</a>
+  <header class="topbar"><div class="topbar-inner"><a class="wordmark" href="#main">MOSS <span>/ 实验室</span></a><span class="offline-badge"><span aria-hidden="true">●</span>离线可用 · 虚构示例</span></div></header>
+  <main id="main">
+    <div class="page-heading"><div><p class="eyebrow">EXPERIMENT 02 / PROMOTION</p><h1>活动试算台</h1><p class="intro">每一单，让多少，还剩多少。</p></div><a class="text-link" href="#method">查看计算口径 <span aria-hidden="true">↗</span></a></div>
+    <div class="workspace">
+      <section class="input-panel" aria-labelledby="input-title">
+        <div class="panel-heading"><div><span class="step-index">01</span><h2 id="input-title">设定一份活动</h2></div><span class="quiet-label">输入即更新</span></div>
+        <label class="preset-label" for="preset">优惠与单量示例</label>
+        <select id="preset"><option value="light">工作日轻促销</option><option value="strong">加大优惠力度</option><option value="daily">日常无优惠</option><option value="custom" disabled>自定义方案</option></select>
+        <p class="helper">示例仅替换优惠和单量，其他参数保持当前输入。</p>
+        <form id="calculator-form" novalidate autocomplete="off">
+          <fieldset><legend>售价与优惠</legend><div class="field-grid">
+            <div class="field"><label for="price">商品售价<span class="sr-only">，元</span></label><div class="input-wrap"><span aria-hidden="true">¥</span><input id="price" name="price" inputmode="decimal" value="32.00" aria-describedby="price-error" required></div><p class="field-error" id="price-error" hidden></p></div>
+            <div class="field"><label for="discount">商家承担优惠<span class="sr-only">，元</span></label><div class="input-wrap"><span aria-hidden="true">¥</span><input id="discount" name="discount" inputmode="decimal" value="4.00" aria-describedby="discount-error" required></div><p class="field-error" id="discount-error" hidden></p></div>
+          </div></fieldset>
+          <fieldset><legend>每单成本</legend><div class="field-grid thirds">
+            <div class="field"><label for="food">食材<span class="sr-only">，元</span></label><div class="input-wrap"><span aria-hidden="true">¥</span><input id="food" name="food" inputmode="decimal" value="10.80" aria-describedby="food-error" required></div><p class="field-error" id="food-error" hidden></p></div>
+            <div class="field"><label for="packaging">包装<span class="sr-only">，元</span></label><div class="input-wrap"><span aria-hidden="true">¥</span><input id="packaging" name="packaging" inputmode="decimal" value="1.60" aria-describedby="packaging-error" required></div><p class="field-error" id="packaging-error" hidden></p></div>
+            <div class="field"><label for="delivery">配送<span class="sr-only">，元</span></label><div class="input-wrap"><span aria-hidden="true">¥</span><input id="delivery" name="delivery" inputmode="decimal" value="2.50" aria-describedby="delivery-error" required></div><p class="field-error" id="delivery-error" hidden></p></div>
+          </div><div class="field-grid spaced">
+            <div class="field"><label for="fee">平台费率<span class="sr-only">，百分比</span></label><div class="input-wrap"><input id="fee" name="fee" inputmode="decimal" value="8" aria-describedby="fee-help fee-error" required><span aria-hidden="true">%</span></div><p class="helper" id="fee-help">按优惠后实收计费</p><p class="field-error" id="fee-error" hidden></p></div>
+            <div class="field"><label for="fixed">日固定支出<span class="sr-only">，元</span></label><div class="input-wrap"><span aria-hidden="true">¥</span><input id="fixed" name="fixed" inputmode="decimal" value="120.00" aria-describedby="fixed-error" required></div><p class="field-error" id="fixed-error" hidden></p></div>
+          </div></fieldset>
+          <fieldset><legend>单量假设</legend><div class="field-grid">
+            <div class="field"><label for="orders">活动日订单量<span class="sr-only">，单 / 天</span></label><div class="input-wrap"><input id="orders" name="orders" inputmode="numeric" value="140" aria-describedby="volume-help orders-error" required><span aria-hidden="true">单</span></div><p class="field-error" id="orders-error" hidden></p></div>
+            <div class="field"><label for="baselineOrders">日常订单量<span class="sr-only">，单 / 天</span></label><div class="input-wrap"><input id="baselineOrders" name="baselineOrders" inputmode="numeric" value="100" aria-describedby="volume-help baselineOrders-error" required><span aria-hidden="true">单</span></div><p class="field-error" id="baselineOrders-error" hidden></p></div>
+          </div><p class="assumption-note" id="volume-help">订单量为手动假设，不会根据优惠自动预测销量。</p></fieldset>
+        </form>
+      </section>
+
+      <section class="results-column" aria-labelledby="result-title">
+        <div class="validation-summary" id="validation-summary" role="status" hidden></div>
+        <div id="result-surface" class="result-panel">
+          <div class="panel-heading"><div><span class="step-index">02</span><h2 id="result-title">看看活动能剩多少</h2></div><span class="result-state" id="result-state">当前测算</span></div>
+          <div class="result-hero"><p>日经营结余 <span class="unit">元 / 天</span></p><div class="profit-number" id="daily-profit" aria-live="polite" aria-atomic="true">1,400.40</div><p class="delta-line" id="delta-line"></p></div>
+          <div class="result-metrics"><article><p>每单贡献</p><strong id="contribution">¥10.86</strong><span>扣除平台费与单均成本</span></article><article><p>保本单量</p><strong id="break-even">12 <span>单 / 天</span></strong><span id="break-even-note">覆盖已填日固定支出</span></article></div>
+          <div id="insight" class="insight"></div>
+          <section class="cost-breakdown" aria-labelledby="breakdown-title"><h3 id="breakdown-title">拆开这一单</h3><div><span>优惠后实收</span><strong id="received">¥28.00</strong></div><div><span>平台费用</span><span id="platform-cost">− ¥2.24</span></div><div><span>食材 + 包装 + 配送</span><span id="variable-cost">− ¥14.90</span></div><div class="breakdown-total"><span>每单贡献</span><strong id="breakdown-contribution">¥10.86</strong></div></section>
+          <div class="result-actions"><button id="save-button" class="button primary" type="button">保存对比方案 <span aria-hidden="true">＋</span></button><button id="export-button" class="button secondary" type="button">导出当前试算 <span aria-hidden="true">↗</span></button></div>
+          <p id="save-feedback" class="action-feedback" role="status">对比方案保留在本次页面会话中，关闭后不保留。</p>
+        </div>
+
+        <section class="sensitivity-panel" aria-labelledby="sensitivity-title"><div class="section-heading"><h2 id="sensitivity-title">只改订单量，结余怎么变？</h2><span class="quiet-label">情景试算</span></div><p>其他参数不变，以下 ±20% 均为演示假设。</p><div class="sensitivity-grid" id="sensitivity-grid"></div></section>
+      </section>
+    </div>
+
+    <section id="saved" class="saved-section" aria-labelledby="saved-title"><div class="section-heading"><div><span class="step-index">03</span><h2 id="saved-title">把方案放在一起比较</h2></div><span class="quiet-label" id="saved-count">0 个已保存方案</span></div><div class="empty-state" id="empty-state"><span class="empty-mark" aria-hidden="true">＝</span><div><h3>还没保存对比方案</h3><p>先调整参数，再点击“保存对比方案”。快照会保留保存时的参数与结果。</p></div></div><div class="table-scroll" id="comparison-table" tabindex="0" aria-label="已保存方案对比，窄屏可横向滚动" hidden><table><caption class="sr-only">已保存的虚构活动试算快照</caption><thead><tr><th scope="col">方案</th><th scope="col" class="numeric">优惠 / 单</th><th scope="col" class="numeric">假设单量</th><th scope="col" class="numeric">每单贡献</th><th scope="col" class="numeric">日结余</th><th scope="col" class="numeric">较各自日常基准</th></tr></thead><tbody id="comparison-rows"></tbody></table></div></section>
+
+    <footer id="method"><div><h2>先说清楚，怎么算。</h2><p>平台费用 = 优惠后实收 × 费率，逐单四舍五入到分。每单贡献 = 优惠后实收 − 平台费用 − 食材 − 包装 − 配送。日经营结余 = 每单贡献 × 假设订单量 − 日固定支出。日常基准采用当前售价、费用与日常订单量，优惠为 0。</p><p>仅计算已填项目，未计税费、退款、平台补贴及其他未填成本。支持离线计算；页面不连接任何经营或交易系统。</p></div><div class="footer-meta">FACET / LOCAL PROTOTYPE<br>全部默认参数均为虚构</div></footer>
+  </main>
+  <noscript><p class="noscript">请启用 JavaScript 后使用本地试算功能。</p></noscript>
+</body>
+</html>
